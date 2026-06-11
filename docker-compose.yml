@@ -61,7 +61,9 @@ services:
       - ./backend/public:/var/www/app/public:ro
     ports:
       # Localhost only by default — put TLS termination in front for production.
-      - "127.0.0.1:${PANEL_PORT:-8080}:80"
+      # To expose directly (e.g. quick test without a domain), set
+      # PANEL_BIND=0.0.0.0 in .env — but read docs/installation.md first.
+      - "${PANEL_BIND:-127.0.0.1}:${PANEL_PORT:-8080}:80"
     security_opt: [no-new-privileges=true]
     networks: [internal]
     healthcheck:

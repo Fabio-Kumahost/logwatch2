@@ -61,6 +61,23 @@ docker compose exec app php bin/console migrate
 docker compose exec app php bin/console create-admin --username admin
 ```
 
+## Accessing the panel ("I opened http://MY-IP and nothing happens")
+
+By default the stack binds to **`127.0.0.1:8080` only** — invisible from the
+internet on purpose. Your options, best first:
+
+1. **SSH tunnel** (instant, nothing exposed):
+   `ssh -L 8080:127.0.0.1:8080 user@your-vps` → open `http://localhost:8080`
+   on your own machine.
+2. **Domain + bundled TLS** (recommended for real use) — see *TLS* below.
+3. **Expose directly without TLS** (lab/temporary only): set
+   `PANEL_BIND=0.0.0.0` in `.env`, run `docker compose up -d`, open
+   `http://YOUR-IP:8080`. Logins travel unencrypted — restrict the port to
+   your own IP in the provider firewall, and don't leave it like this.
+
+In all cases remember the port is **8080**, not 80, and your VPS provider's
+firewall/security group must allow whatever port you use.
+
 ## TLS
 
 The stack listens on `127.0.0.1:${PANEL_PORT}` by default. For production:
