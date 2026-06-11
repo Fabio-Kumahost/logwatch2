@@ -27,7 +27,7 @@ final class JsonErrorHandler extends ErrorHandler
             return Json::error($response, $e->getCode(), $code, $e->getMessage());
         }
 
-        $this->logger?->error('unhandled exception', [
+        $this->logger->error('unhandled exception', [
             'exception' => $e::class,
             'message' => $e->getMessage(),
             'file' => $e->getFile() . ':' . $e->getLine(),

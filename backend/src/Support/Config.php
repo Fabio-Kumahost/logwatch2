@@ -9,8 +9,8 @@ final class Config
 {
     public static function env(string $key, ?string $default = null): ?string
     {
-        $v = $_ENV[$key] ?? getenv($key);
-        if ($v === false || $v === null || $v === '') {
+        $v = $_ENV[$key] ?? getenv($key); // getenv() returns string|false, never null
+        if ($v === false || $v === '') {
             return $default;
         }
         return (string) $v;
