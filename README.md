@@ -39,7 +39,7 @@ it is, and how to fix it* — with sensitive data masked before anything leaves 
 ## Quick start
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/USERNAME/logwatch2/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Fabio-Kumahost/logwatch2/main/install.sh | bash
 ```
 
 The installer checks dependencies, generates secrets, creates the `.env`, starts the

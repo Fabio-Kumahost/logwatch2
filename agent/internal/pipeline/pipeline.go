@@ -12,8 +12,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/USERNAME/logwatch2/agent/internal/config"
-	"github.com/USERNAME/logwatch2/agent/internal/tail"
+	"github.com/Fabio-Kumahost/logwatch2/agent/internal/config"
+	"github.com/Fabio-Kumahost/logwatch2/agent/internal/tail"
 )
 
 type rule struct {

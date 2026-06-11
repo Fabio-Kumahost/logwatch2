@@ -1,4 +1,4 @@
-module github.com/USERNAME/logwatch2/agent
+module github.com/Fabio-Kumahost/logwatch2/agent
 
 go 1.22
 

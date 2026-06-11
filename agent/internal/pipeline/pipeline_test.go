@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/USERNAME/logwatch2/agent/internal/config"
-	"github.com/USERNAME/logwatch2/agent/internal/tail"
+	"github.com/Fabio-Kumahost/logwatch2/agent/internal/config"
+	"github.com/Fabio-Kumahost/logwatch2/agent/internal/tail"
 )
 
 func fileSource(path, format string, multiline bool) config.Source {

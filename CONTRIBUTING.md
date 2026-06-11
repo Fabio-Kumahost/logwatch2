@@ -5,7 +5,7 @@ Thanks for considering a contribution! This document keeps the process predictab
 ## Development setup
 
 ```bash
-git clone https://github.com/USERNAME/logwatch2.git
+git clone https://github.com/Fabio-Kumahost/logwatch2.git
 cd logwatch2
 cp .env.example .env            # fill in dev values, defaults work for local use
 docker compose up -d --build    # panel on http://localhost:8080

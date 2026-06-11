@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Logwatch2 panel installer
-#   curl -fsSL https://raw.githubusercontent.com/USERNAME/logwatch2/main/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/Fabio-Kumahost/logwatch2/main/install.sh | bash
 #
 # Flags:
 #   --dir PATH          install directory          (default /opt/logwatch2)
@@ -13,7 +13,7 @@
 #
 set -euo pipefail
 
-REPO="USERNAME/logwatch2"
+REPO="Fabio-Kumahost/logwatch2"
 INSTALL_DIR="${LW2_DIR:-/opt/logwatch2}"
 PANEL_PORT="${LW2_PORT:-8080}"
 ADMIN_USER="${LW2_ADMIN_USER:-admin}"

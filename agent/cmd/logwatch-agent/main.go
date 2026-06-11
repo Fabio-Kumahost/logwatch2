@@ -13,11 +13,11 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/USERNAME/logwatch2/agent/internal/config"
-	"github.com/USERNAME/logwatch2/agent/internal/journald"
-	"github.com/USERNAME/logwatch2/agent/internal/pipeline"
-	"github.com/USERNAME/logwatch2/agent/internal/shipper"
-	"github.com/USERNAME/logwatch2/agent/internal/tail"
+	"github.com/Fabio-Kumahost/logwatch2/agent/internal/config"
+	"github.com/Fabio-Kumahost/logwatch2/agent/internal/journald"
+	"github.com/Fabio-Kumahost/logwatch2/agent/internal/pipeline"
+	"github.com/Fabio-Kumahost/logwatch2/agent/internal/shipper"
+	"github.com/Fabio-Kumahost/logwatch2/agent/internal/tail"
 )
 
 func main() {

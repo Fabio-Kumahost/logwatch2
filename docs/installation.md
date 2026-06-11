@@ -3,7 +3,7 @@
 ## One-line install (panel)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/USERNAME/logwatch2/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Fabio-Kumahost/logwatch2/main/install.sh | bash
 ```
 
 What it does, in order — every step prints what it found and fails loudly:
@@ -35,7 +35,7 @@ Flags: `--dir PATH` · `--port N` · `--version vX.Y.Z` · `--non-interactive` �
 In the panel: *Servers → Add server* → copy the generated command:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/USERNAME/logwatch2/main/scripts/install-agent.sh \
+curl -fsSL https://raw.githubusercontent.com/Fabio-Kumahost/logwatch2/main/scripts/install-agent.sh \
   | sudo bash -s -- --panel-url https://logs.example.com --token lw2_xxxxxxxx
 ```
 
@@ -53,7 +53,7 @@ journalctl -u logwatch-agent -f     # agent's own log
 ## Manual installation (panel)
 
 ```bash
-git clone https://github.com/USERNAME/logwatch2.git /opt/logwatch2
+git clone https://github.com/Fabio-Kumahost/logwatch2.git /opt/logwatch2
 cd /opt/logwatch2
 cp .env.example .env   # set APP_KEY (openssl rand -base64 32) and DB_PASSWORD
 docker compose up -d --build

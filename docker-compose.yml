@@ -21,7 +21,7 @@ services:
 
   app:
     build: ./backend
-    image: ghcr.io/username/logwatch2-panel:${LW2_VERSION:-latest}
+    image: ghcr.io/fabio-kumahost/logwatch2-panel:${LW2_VERSION:-latest}
     restart: unless-stopped
     env_file: .env
     depends_on:
@@ -35,7 +35,7 @@ services:
     networks: [internal]
 
   worker:
-    image: ghcr.io/username/logwatch2-panel:${LW2_VERSION:-latest}
+    image: ghcr.io/fabio-kumahost/logwatch2-panel:${LW2_VERSION:-latest}
     build: ./backend
     restart: unless-stopped
     command: php bin/worker.php

@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 #
 # Logwatch2 agent installer (run on each monitored server, as root)
-#   curl -fsSL https://raw.githubusercontent.com/USERNAME/logwatch2/main/scripts/install-agent.sh \
+#   curl -fsSL https://raw.githubusercontent.com/Fabio-Kumahost/logwatch2/main/scripts/install-agent.sh \
 #     | sudo bash -s -- --panel-url https://logs.example.com --token lw2_xxxx
 #
 # Idempotent: re-running upgrades the binary and keeps existing config.
 #
 set -euo pipefail
 
-REPO="USERNAME/logwatch2"
+REPO="Fabio-Kumahost/logwatch2"
 PANEL_URL="" TOKEN="" VERSION="latest"
 
 info() { printf '\033[0;32m[*]\033[0m %s\n' "$*"; }

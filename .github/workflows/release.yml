@@ -24,7 +24,7 @@ jobs:
           for arch in amd64 arm64; do
             CGO_ENABLED=0 GOOS=linux GOARCH=$arch \
               go build -trimpath \
-                -ldflags "-s -w -X github.com/USERNAME/logwatch2/agent/internal/shipper.Version=${GITHUB_REF_NAME}" \
+                -ldflags "-s -w -X github.com/Fabio-Kumahost/logwatch2/agent/internal/shipper.Version=${GITHUB_REF_NAME}" \
                 -o "dist/logwatch-agent_linux_$arch" ./cmd/logwatch-agent
             (cd dist && sha256sum "logwatch-agent_linux_$arch" > "logwatch-agent_linux_$arch.sha256")
           done
@@ -38,6 +38,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3   # arm64 cross-build
       - uses: docker/setup-buildx-action@v3
       - uses: docker/login-action@v3
         with:
@@ -48,9 +49,10 @@ jobs:
         with:
           context: backend
           push: true
+          # Image refs must be lowercase — github.repository preserves owner case.
           tags: |
-            ghcr.io/${{ github.repository }}-panel:${{ github.ref_name }}
-            ghcr.io/${{ github.repository }}-panel:latest
+            ghcr.io/fabio-kumahost/logwatch2-panel:${{ github.ref_name }}
+            ghcr.io/fabio-kumahost/logwatch2-panel:latest
           platforms: linux/amd64,linux/arm64
 
   release:

@@ -11,8 +11,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/USERNAME/logwatch2/agent/internal/config"
-	"github.com/USERNAME/logwatch2/agent/internal/tail"
+	"github.com/Fabio-Kumahost/logwatch2/agent/internal/config"
+	"github.com/Fabio-Kumahost/logwatch2/agent/internal/tail"
 )
 
 // syslog priority (0-7) → panel log level.

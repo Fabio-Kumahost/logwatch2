@@ -1,6 +1,6 @@
 [Unit]
 Description=Logwatch2 log shipping agent
-Documentation=https://github.com/USERNAME/logwatch2
+Documentation=https://github.com/Fabio-Kumahost/logwatch2
 After=network-online.target
 Wants=network-online.target
 
