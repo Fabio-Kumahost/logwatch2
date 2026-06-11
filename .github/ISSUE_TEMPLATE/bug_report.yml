@@ -1,0 +1,38 @@
+name: Bug report
+description: Something doesn't work as documented
+labels: [bug, triage]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Logwatch2 version
+      placeholder: v0.2.1 (panel) / v0.2.1 (agent)
+    validations:
+      required: true
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      options: [Panel (web/API), Agent, AI analysis, Notifications, Installer, Docs]
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, what happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      description: >
+        Panel: `docker compose logs app worker` · Agent: `journalctl -u logwatch-agent -n 50`.
+        ⚠️ Redact tokens, IPs and hostnames before pasting.
+      render: shell
+  - type: input
+    id: env
+    attributes:
+      label: Environment
+      placeholder: Debian 12, Docker 26.1, 2 agents

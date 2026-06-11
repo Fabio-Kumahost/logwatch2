@@ -1,0 +1,32 @@
+{# Base layout. Strict CSP: no inline scripts/styles, no CDNs — everything
+   ships from /assets. Page JS is dispatched via body[data-page] in app.js. #}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Logwatch2{% endblock %}</title>
+  <link rel="stylesheet" href="/assets/app.css">
+  <link rel="icon" href="data:,">
+</head>
+<body data-page="{% block page %}{% endblock %}" data-csrf="{{ csrf }}" {% block bodyattrs %}{% endblock %}>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="/">📡 Logwatch2</a>
+    <nav>
+      <a href="/" {% if page_active is defined and page_active == 'dashboard' %}class="active"{% endif %}>Dashboard</a>
+      <a href="/logs">Logs</a>
+      {% if role == 'admin' %}<a href="/settings">Settings</a>{% endif %}
+    </nav>
+    <div class="userbox">
+      <span class="muted">{{ username }} ({{ role }})</span>
+      <button id="logout-btn" class="btn btn-ghost">Logout</button>
+    </div>
+  </div>
+</header>
+<main class="container">
+{% block content %}{% endblock %}
+</main>
+<script src="/assets/app.js"></script>
+</body>
+</html>

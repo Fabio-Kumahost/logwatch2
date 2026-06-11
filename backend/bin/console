@@ -1,0 +1,79 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+/**
+ * Admin CLI: php bin/console <command>
+ *   migrate                       apply pending migrations (idempotent)
+ *   create-admin --username NAME  create admin user, prints random password once
+ *   rotate-app-key                re-seal stored secrets with a new APP_KEY
+ */
+
+use App\Support\Crypto;
+
+require __DIR__ . '/../vendor/autoload.php';
+$container = require __DIR__ . '/../config/bootstrap.php';
+$pdo = $container->get(PDO::class);
+
+$command = $argv[1] ?? 'help';
+$opts = getopt('', ['username:', 'password:'], $rest);
+
+switch ($command) {
+    case 'migrate':
+        $pdo->exec('CREATE TABLE IF NOT EXISTS schema_migrations
+                    (file varchar(255) PRIMARY KEY, applied_at timestamptz NOT NULL DEFAULT now())');
+        $applied = $pdo->query('SELECT file FROM schema_migrations')->fetchAll(PDO::FETCH_COLUMN);
+        $files = glob(__DIR__ . '/../migrations/*.sql');
+        sort($files);
+        $ran = 0;
+        foreach ($files as $file) {
+            $name = basename($file);
+            if (in_array($name, $applied, true)) {
+                continue;
+            }
+            echo "applying $name … ";
+            $pdo->exec(file_get_contents($file));
+            $stmt = $pdo->prepare('INSERT INTO schema_migrations (file) VALUES (?)');
+            $stmt->execute([$name]);
+            echo "ok\n";
+            $ran++;
+        }
+        echo $ran === 0 ? "already up to date\n" : "$ran migration(s) applied\n";
+        break;
+
+    case 'create-admin':
+        $username = $opts['username'] ?? 'admin';
+        if (!preg_match('/^[a-zA-Z0-9_.-]{3,64}$/', $username)) {
+            fwrite(STDERR, "invalid username\n");
+            exit(1);
+        }
+        // --password only for automation; default is a generated one, printed once.
+        $password = $opts['password'] ?? rtrim(strtr(base64_encode(random_bytes(18)), '+/', '-_'), '=');
+        $hash = password_hash($password, PASSWORD_ARGON2ID);
+        $stmt = $pdo->prepare(
+            "INSERT INTO users (username, password_hash, role) VALUES (?, ?, 'admin')
+             ON CONFLICT (username) DO NOTHING");
+        $stmt->execute([$username, $hash]);
+        if ($stmt->rowCount() === 0) {
+            fwrite(STDERR, "user '$username' already exists — not modified\n");
+            exit(2);
+        }
+        echo "admin user created\n  username: $username\n";
+        if (!isset($opts['password'])) {
+            echo "  password: $password\n  (shown once — change it after first login)\n";
+        }
+        break;
+
+    case 'rotate-app-key':
+        echo "1. generate a new key:  openssl rand -base64 32\n";
+        echo "2. set APP_KEY_NEW in .env, restart, run this command again —\n";
+        echo "   it re-seals all encrypted settings/channels, then tells you to\n";
+        echo "   promote APP_KEY_NEW to APP_KEY. (Implemented in Support\\KeyRotation.)\n";
+        $container->get(App\Support\KeyRotation::class)->run();
+        break;
+
+    default:
+        echo "usage: php bin/console {migrate|create-admin --username NAME|rotate-app-key}\n";
+        exit($command === 'help' ? 0 : 1);
+}

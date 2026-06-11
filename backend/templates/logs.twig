@@ -1,0 +1,32 @@
+{% extends "layout.twig" %}
+{% block page %}logs{% endblock %}
+{% block title %}Logs — Logwatch2{% endblock %}
+
+{% block content %}
+<section class="card">
+  <div class="card-head"><h2>Log stream</h2></div>
+  <form id="log-filters" class="filters">
+    <select name="server" id="filter-server"><option value="">all servers</option></select>
+    <select name="level">
+      <option value="">any level</option>
+      <option>warning</option><option>error</option><option>critical</option>
+    </select>
+    <input name="service" placeholder="service">
+    <input name="q" placeholder="search…">
+    <input name="from" type="datetime-local">
+    <input name="to" type="datetime-local">
+    <button class="btn btn-primary" type="submit">Filter</button>
+  </form>
+  <table class="table" id="logs-table">
+    <thead><tr>
+      <th>Time</th><th>Server</th><th>Service</th><th>Level</th><th>Message</th>
+    </tr></thead>
+    <tbody></tbody>
+  </table>
+  <div class="pager">
+    <button class="btn" id="prev-page">‹ newer</button>
+    <span class="muted" id="page-info"></span>
+    <button class="btn" id="next-page">older ›</button>
+  </div>
+</section>
+{% endblock %}

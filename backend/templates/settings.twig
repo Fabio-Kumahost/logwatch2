@@ -1,0 +1,112 @@
+{% extends "layout.twig" %}
+{% block page %}settings{% endblock %}
+{% block title %}Settings — Logwatch2{% endblock %}
+
+{% block content %}
+<div class="grid-2">
+
+  <section class="card">
+    <div class="card-head"><h2>🤖 AI provider</h2></div>
+    <form id="ai-form" class="form">
+      <label class="check"><input type="checkbox" name="enabled"> Enable AI analysis</label>
+      <label>Provider
+        <select name="provider">
+          <option value="openai">OpenAI</option>
+          <option value="anthropic">Anthropic (Claude)</option>
+          <option value="openai_compatible">OpenAI-compatible (Ollama, vLLM, …)</option>
+        </select>
+      </label>
+      <label>Model <input name="model" placeholder="gpt-4o-mini / claude-haiku-4-5 / llama3.1"></label>
+      <label>Base URL <input name="base_url" placeholder="only for openai_compatible"></label>
+      <label>API key <input name="api_key" type="password" placeholder="leave empty to keep stored key"></label>
+      <div class="muted" id="ai-key-state"></div>
+      <button class="btn btn-primary">Save</button>
+    </form>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2>🕵️ Masking preview</h2></div>
+    <p class="muted">Paste a sample log line — this is exactly what an AI provider would receive.</p>
+    <form id="mask-form" class="form">
+      <textarea name="sample" rows="3" placeholder="Jun 11 07:32:01 web sshd[4711]: Failed password for root from 203.0.113.7"></textarea>
+      <button class="btn">Preview</button>
+    </form>
+    <pre id="mask-result" class="raw hidden"></pre>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2>🔔 Notification channels</h2></div>
+    <ul id="channel-list" class="plain-list"></ul>
+    <form id="channel-form" class="form">
+      <div class="form-row">
+        <select name="type"><option value="discord">Discord</option><option value="gotify">Gotify</option></select>
+        <input name="name" placeholder="name" required>
+      </div>
+      <input name="webhook_url" placeholder="Discord webhook URL">
+      <div class="form-row">
+        <input name="server_url" placeholder="Gotify server URL">
+        <input name="app_token" placeholder="Gotify app token">
+      </div>
+      <button class="btn btn-primary">Add channel</button>
+    </form>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2>📜 Notification rules</h2></div>
+    <ul id="rule-list" class="plain-list"></ul>
+    <form id="rule-form" class="form">
+      <div class="form-row">
+        <select name="trigger">
+          <option value="critical_error">critical error</option>
+          <option value="server_offline">server offline</option>
+          <option value="new_error">new error</option>
+          <option value="recurring_error">recurring error</option>
+          <option value="auth_attack">auth attack (Security Radar)</option>
+          <option value="anomaly">anomaly</option>
+          <option value="digest">weekly digest</option>
+        </select>
+        <select name="channel_id" id="rule-channel"></select>
+        <input name="cooldown_seconds" type="number" value="900" min="0" title="cooldown (s)">
+      </div>
+      <button class="btn btn-primary">Add rule</button>
+    </form>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2>🖥 Servers &amp; agent tokens</h2></div>
+    <ul id="srv-admin-list" class="plain-list"></ul>
+    <form id="server-form" class="form form-row">
+      <input name="name" placeholder="new server name" required>
+      <button class="btn btn-primary">Add server</button>
+    </form>
+    <pre id="token-reveal" class="raw hidden"></pre>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2>👥 Users</h2></div>
+    <ul id="user-list" class="plain-list"></ul>
+    <form id="user-form" class="form">
+      <div class="form-row">
+        <input name="username" placeholder="username" required>
+        <select name="role"><option value="user">user</option><option value="admin">admin</option></select>
+      </div>
+      <input name="password" type="password" placeholder="password (min 12 chars)" required>
+      <button class="btn btn-primary">Add user</button>
+    </form>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2>🔐 Two-factor authentication (your account)</h2></div>
+    <div id="totp-state" class="muted">loading…</div>
+    <div id="totp-setup" class="hidden">
+      <pre id="totp-secret" class="raw"></pre>
+      <p class="muted">Add the secret to your authenticator app, then confirm with a code:</p>
+    </div>
+    <form id="totp-form" class="form form-row">
+      <input name="code" inputmode="numeric" maxlength="6" placeholder="123456">
+      <button class="btn btn-primary" id="totp-action">Enable 2FA</button>
+    </form>
+  </section>
+
+</div>
+{% endblock %}

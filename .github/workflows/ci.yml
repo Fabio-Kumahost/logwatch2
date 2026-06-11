@@ -1,0 +1,95 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  php:
+    name: Backend (PHP)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: pdo_pgsql, sodium
+          coverage: none
+      - name: Validate composer.json
+        working-directory: backend
+        run: composer validate --strict
+      - name: Install dependencies
+        working-directory: backend
+        run: composer install --prefer-dist --no-progress
+      - name: Lint (PSR-12)
+        working-directory: backend
+        run: composer cs
+      - name: Static analysis (PHPStan)
+        working-directory: backend
+        run: composer stan
+      - name: Tests (PHPUnit)
+        working-directory: backend
+        run: composer test
+      - name: Dependency audit
+        working-directory: backend
+        run: composer audit
+
+  go:
+    name: Agent (Go)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+          cache-dependency-path: agent/go.sum
+      - name: Vet
+        working-directory: agent
+        run: go vet ./...
+      - name: Test
+        working-directory: agent
+        run: go test ./...
+      - name: Build (amd64 + arm64)
+        working-directory: agent
+        run: |
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath ./cmd/logwatch-agent
+          CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -trimpath ./cmd/logwatch-agent
+      - name: Vulnerability check
+        working-directory: agent
+        run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
+
+  shell:
+    name: Installer scripts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: ShellCheck
+        run: shellcheck install.sh scripts/*.sh
+
+  docker:
+    name: Docker build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build panel image
+        run: docker build backend/
+      - name: Validate compose file
+        run: |
+          cp .env.example .env
+          sed -i 's/CHANGE_ME_RANDOM/ci-only-password/' .env
+          docker compose config -q
+
+  secrets:
+    name: Secret scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

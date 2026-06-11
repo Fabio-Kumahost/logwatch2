@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Login — Logwatch2</title>
+  <link rel="stylesheet" href="/assets/app.css">
+  <link rel="icon" href="data:,">
+</head>
+<body data-page="login">
+<main class="login-wrap">
+  <form id="login-form" class="card login-card">
+    <h1 class="brand">📡 Logwatch2</h1>
+    <p class="muted">Sign in to your monitoring panel</p>
+    <label>Username
+      <input name="username" autocomplete="username" required autofocus>
+    </label>
+    <label>Password
+      <input name="password" type="password" autocomplete="current-password" required>
+    </label>
+    <label id="totp-row" class="hidden">Two-factor code
+      <input name="totp_code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6"
+             autocomplete="one-time-code" placeholder="123456">
+    </label>
+    <div id="login-error" class="error hidden"></div>
+    <button class="btn btn-primary" type="submit">Sign in</button>
+  </form>
+</main>
+<script src="/assets/app.js"></script>
+</body>
+</html>

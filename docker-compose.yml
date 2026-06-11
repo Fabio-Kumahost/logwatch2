@@ -1,0 +1,78 @@
+# Logwatch2 stack. Configuration comes from .env (see .env.example).
+# TLS: combine with docker-compose.tls.yml or use your own reverse proxy.
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-logwatch2}
+      POSTGRES_USER: ${DB_USER:-logwatch2}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-logwatch2} -d ${DB_NAME:-logwatch2}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks: [internal]
+    # No published port: the DB is reachable only inside the compose network.
+
+  app:
+    build: ./backend
+    image: ghcr.io/username/logwatch2-panel:${LW2_VERSION:-latest}
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      db:
+        condition: service_healthy
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/www/app/var:uid=82,gid=82   # www-data on alpine
+    security_opt: [no-new-privileges=true]
+    networks: [internal]
+
+  worker:
+    image: ghcr.io/username/logwatch2-panel:${LW2_VERSION:-latest}
+    build: ./backend
+    restart: unless-stopped
+    command: php bin/worker.php
+    env_file: .env
+    depends_on:
+      db:
+        condition: service_healthy
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/www/app/var:uid=82,gid=82
+    security_opt: [no-new-privileges=true]
+    networks: [internal]
+    # Scale out if AI/notification jobs queue up:
+    #   docker compose up -d --scale worker=3
+
+  web:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    depends_on: [app]
+    volumes:
+      - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./backend/public:/var/www/app/public:ro
+    ports:
+      # Localhost only by default — put TLS termination in front for production.
+      - "127.0.0.1:${PANEL_PORT:-8080}:80"
+    security_opt: [no-new-privileges=true]
+    networks: [internal]
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/healthz"]
+      interval: 10s
+      timeout: 3s
+      retries: 12
+
+volumes:
+  db_data:
+
+networks:
+  internal:
+    driver: bridge

@@ -1,0 +1,25 @@
+# TLS overlay: automatic Let's Encrypt via Caddy.
+# Usage:
+#   echo 'PANEL_DOMAIN=logs.example.com' >> .env
+#   docker compose -f docker-compose.yml -f docker-compose.tls.yml up -d
+
+services:
+  web:
+    ports: !override []   # nginx no longer published; Caddy fronts it
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on: [web]
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      PANEL_DOMAIN: ${PANEL_DOMAIN:?set PANEL_DOMAIN in .env}
+    command: caddy reverse-proxy --from "https://${PANEL_DOMAIN}" --to http://web:80
+    volumes:
+      - caddy_data:/data
+    networks: [internal]
+
+volumes:
+  caddy_data:

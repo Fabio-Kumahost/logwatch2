@@ -1,0 +1,37 @@
+{% extends "layout.twig" %}
+{% block page %}dashboard{% endblock %}
+{% block title %}Dashboard — Logwatch2{% endblock %}
+
+{% block content %}
+<div class="cards" id="stat-cards">
+  <div class="card stat"><div class="muted">Servers online</div><div class="stat-value" id="stat-online">–</div></div>
+  <div class="card stat"><div class="muted">Critical (24h)</div><div class="stat-value text-crit" id="stat-critical">–</div></div>
+  <div class="card stat"><div class="muted">Errors (24h)</div><div class="stat-value text-err" id="stat-errors">–</div></div>
+  <div class="card stat"><div class="muted">AI budget</div><div class="stat-value" id="stat-ai">–</div></div>
+</div>
+
+<div class="grid-2">
+  <section class="card">
+    <div class="card-head"><h2>Servers</h2></div>
+    <ul class="server-list" id="server-list"></ul>
+  </section>
+
+  <section class="card span-2">
+    <div class="card-head">
+      <h2>Recent errors</h2>
+      <a href="/logs" class="muted">log stream →</a>
+    </div>
+    <table class="table" id="errors-table">
+      <thead><tr>
+        <th>Level</th><th>Error</th><th>Service</th><th>Srv</th><th>Count</th><th>Last seen</th>
+      </tr></thead>
+      <tbody></tbody>
+    </table>
+  </section>
+</div>
+
+<section class="card" id="anomaly-card">
+  <div class="card-head"><h2>📈 Patterns &amp; anomalies (24h)</h2></div>
+  <ul class="anomaly-list" id="anomaly-list"><li class="muted">none detected</li></ul>
+</section>
+{% endblock %}

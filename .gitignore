@@ -1,0 +1,33 @@
+# Secrets & local config — never commit
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# PHP
+backend/vendor/
+backend/var/
+backend/.phpunit.cache/
+composer.phar
+
+# Go
+agent/bin/
+agent/dist/
+*.test
+*.out
+
+# Docker volumes / runtime data
+data/
+db_data/
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# Tooling state (local AI/dev tooling, not part of the project)
+.claude/
+.claude-flow/

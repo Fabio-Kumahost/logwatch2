@@ -1,0 +1,53 @@
+# Logwatch2 agent configuration — /etc/logwatch2/agent.yaml
+# Validate with: logwatch-agent --check --config /etc/logwatch2/agent.yaml
+
+panel:
+  url: https://logs.example.com
+  # Preferred: keep the token in a root-only file instead of this config.
+  token_file: /etc/logwatch2/agent.token
+  # token: lw2_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+  # allow_insecure: false      # NEVER enable outside an isolated lab
+  # tls_ca_file: /etc/logwatch2/panel-ca.pem   # for self-signed panels
+  timeout: 30s
+
+heartbeat_interval: 60s
+state_file: /var/lib/logwatch-agent/state.json
+
+batch:
+  max_entries: 200        # ship when N lines are queued …
+  max_wait: 5s            # … or after this much time
+  spool_dir: /var/lib/logwatch-agent/spool
+  spool_max_bytes: 52428800   # 50 MiB of offline buffer
+
+sources:
+  # Plain log files (path may be a glob).
+  - path: /var/log/syslog
+    service: syslog
+  - path: /var/log/auth.log
+    service: sshd
+  - path: /var/log/nginx/error.log
+    service: nginx
+  - path: /var/log/nginx/access.log
+    service: nginx
+  - path: /var/log/apache2/error.log
+    service: apache
+
+  # systemd journal (runs `journalctl -f` under the hood — no extra deps).
+  # Omit `units` to stream the whole journal.
+  - type: journald
+    service: systemd
+    units: [nginx.service, postgresql.service]
+
+  # Docker json-file logs: format unwraps {"log":…,"time":…} automatically.
+  - path: /var/lib/docker/containers/*/*-json.log
+    service: docker
+    format: docker_json
+
+  # Game servers / apps with stack traces: multiline joins continuation
+  # lines (default pattern: lines starting with whitespace) into one entry.
+  - path: /home/minecraft/server/logs/latest.log
+    service: minecraft
+    multiline:
+      enabled: true
+      pattern: '^[ \t]|^Caused by:|^\.\.\. '
+      max_lines: 50

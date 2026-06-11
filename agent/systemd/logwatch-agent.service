@@ -1,0 +1,37 @@
+[Unit]
+Description=Logwatch2 log shipping agent
+Documentation=https://github.com/USERNAME/logwatch2
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/logwatch-agent --config /etc/logwatch2/agent.yaml
+Restart=always
+RestartSec=5
+
+# Least privilege: dedicated user, read-only system, log dirs readable,
+# state dir writable, hard resource caps.
+User=logwatch
+Group=logwatch
+SupplementaryGroups=adm systemd-journal
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=read-only
+PrivateTmp=yes
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+RestrictNamespaces=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+CapabilityBoundingSet=
+SystemCallFilter=@system-service
+ReadWritePaths=/var/lib/logwatch-agent
+StateDirectory=logwatch-agent
+
+MemoryMax=128M
+CPUQuota=20%
+
+[Install]
+WantedBy=multi-user.target
