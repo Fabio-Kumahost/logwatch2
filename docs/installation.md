@@ -1,34 +1,47 @@
 # Installation
 
+> **Prerequisite:** a (sub)domain for the panel, e.g. `logs.example.com`,
+> with an A/AAAA record pointing to the server. The panel always runs on its
+> own domain behind HTTPS — that is the supported setup.
+
 ## One-line install (panel)
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/Fabio-Kumahost/logwatch2/main/install.sh | bash
 ```
 
-What it does, in order — every step prints what it found and fails loudly:
+The installer is an interactive wizard. It walks through 7 steps, prints what
+it found at each one, and fails loudly with a hint when something is off:
 
-1. **Pre-flight:** Linux + systemd check, `curl`/`openssl` present, warns when
-   running as root (recommends a sudo-capable user), checks the target
-   directory (`/opt/logwatch2` default) — **refuses to touch an existing
-   installation** unless `--force`.
-2. **Docker:** detects Docker ≥ 24 + compose plugin; offers to install via
-   `get.docker.com` (asks first; `--non-interactive` requires preinstalled Docker
-   and skips the offer).
-3. **Ports:** checks `PANEL_PORT` (default 8080) is free; suggests alternatives.
-4. **Download:** fetches the latest release tarball (or `--version vX.Y.Z`)
-   and verifies its SHA-256 against the release checksum file.
-5. **Secrets:** generates `APP_KEY` and `DB_PASSWORD` via `openssl rand`,
-   writes `.env` (mode 600).
-6. **Start:** `docker compose up -d`, waits for the health endpoint.
-7. **Initialize:** runs migrations; creates the admin user with a random
-   password — **printed once**, never stored in plaintext.
-8. **Summary:** panel URL, admin credentials, agent install command, and where
-   the data lives.
+1. **System requirements** — Linux, curl/openssl/tar, target directory
+   (`/opt/logwatch2`); **refuses to touch an existing installation** unless `--force`.
+2. **Domain & DNS** — asks for the panel domain, resolves it and compares it
+   with the server's public IP (mismatch → warning, e.g. when a CDN/proxy sits
+   in front). Then asks: bundled automatic HTTPS (Caddy, recommended) or
+   *behind my own reverse proxy*. Also asks for the admin username.
+3. **Docker** — detects Docker + compose plugin, offers installation via
+   `get.docker.com`.
+4. **Ports** — Caddy mode: 80+443 must be free · proxy mode: 8080 must be free.
+5. **Download** — fetches the release tarball and verifies its SHA-256.
+6. **Configuration** — generates `APP_KEY`/`DB_PASSWORD`, sets
+   `APP_URL=https://<domain>`, writes `.env` (mode 600). In Caddy mode it also
+   sets `COMPOSE_FILE=docker-compose.yml:docker-compose.tls.yml`, so every
+   plain `docker compose …` command automatically includes the TLS overlay.
+7. **Start & initialize** — `docker compose up -d`, waits for app health,
+   runs migrations, creates the admin (password **printed once**), then waits
+   for the Let's Encrypt certificate and prints a summary with the panel URL
+   and the agent install command.
 
-Flags: `--dir PATH` · `--port N` · `--version vX.Y.Z` · `--non-interactive` ·
-`--force` · `--no-start` (prepare only). Environment overrides:
-`LW2_DIR`, `LW2_PORT`, `LW2_ADMIN_USER`.
+Flags: `--domain logs.example.com` · `--admin-user NAME` · `--behind-proxy` ·
+`--dir PATH` · `--version vX.Y.Z` · `--non-interactive` · `--force` ·
+`--no-start`. Environment overrides: `LW2_DOMAIN`, `LW2_DIR`, `LW2_ADMIN_USER`.
+
+Unattended example (CI / cloud-init — Docker is auto-installed when missing):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Fabio-Kumahost/logwatch2/main/install.sh \
+  | bash -s -- --non-interactive --domain logs.example.com
+```
 
 ## Agent install (per monitored server)
 
@@ -63,30 +76,26 @@ docker compose exec app php bin/console create-admin --username admin
 
 ## Accessing the panel ("I opened http://MY-IP and nothing happens")
 
-By default the stack binds to **`127.0.0.1:8080` only** — invisible from the
-internet on purpose. Your options, best first:
+The panel is only served via **https://your-domain** (Caddy mode) — there is
+deliberately nothing listening publicly on the bare IP. If the domain doesn't
+load: check the A record, ports 80/443 in the provider firewall, and
+`docker compose logs caddy`.
 
-1. **SSH tunnel** (instant, nothing exposed):
-   `ssh -L 8080:127.0.0.1:8080 user@your-vps` → open `http://localhost:8080`
-   on your own machine.
-2. **Domain + bundled TLS** (recommended for real use) — see *TLS* below.
-3. **Expose directly without TLS** (lab/temporary only): set
-   `PANEL_BIND=0.0.0.0` in `.env`, run `docker compose up -d`, open
-   `http://YOUR-IP:8080`. Logins travel unencrypted — restrict the port to
-   your own IP in the provider firewall, and don't leave it like this.
+In `--behind-proxy` mode the stack binds to **`127.0.0.1:8080` only**; your
+reverse proxy terminates TLS (example: `examples/nginx-reverse-proxy.conf`).
+For a quick look without any exposure:
+`ssh -L 8080:127.0.0.1:8080 user@your-vps` → `http://localhost:8080`.
+A direct `PANEL_BIND=0.0.0.0` exposure without TLS exists for labs but is
+unsupported for real use — logins would travel in plaintext.
 
-In all cases remember the port is **8080**, not 80, and your VPS provider's
-firewall/security group must allow whatever port you use.
+## TLS modes recap
 
-## TLS
-
-The stack listens on `127.0.0.1:${PANEL_PORT}` by default. For production:
-
-- **Existing reverse proxy:** point Caddy/Traefik/nginx at
-  `http://127.0.0.1:8080` and terminate TLS there (example snippets in
-  `examples/`). Set `APP_URL=https://…` so links in notifications are correct.
-- **Bundled Caddy:** `docker compose -f docker-compose.yml -f docker-compose.tls.yml up -d`
-  with `PANEL_DOMAIN=logs.example.com` in `.env` — automatic Let's Encrypt.
+- **Caddy (default):** automatic Let's Encrypt for `PANEL_DOMAIN`; the
+  installer writes `COMPOSE_FILE` into `.env`, so plain `docker compose`
+  commands keep including the overlay.
+- **Your own proxy (`--behind-proxy`):** point it at `http://127.0.0.1:8080`,
+  set `APP_URL=https://…` (the installer already did) so notification links
+  are correct.
 
 Agents require HTTPS unless `allow_insecure: true` is set (lab use only).
 

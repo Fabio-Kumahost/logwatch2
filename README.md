@@ -38,15 +38,20 @@ it is, and how to fix it* — with sensitive data masked before anything leaves 
 
 ## Quick start
 
+You need a (sub)domain pointing at your server — the panel always runs behind
+HTTPS on its own domain (automatic Let's Encrypt via bundled Caddy).
+
 ```bash
 curl -fsSL https://raw.githubusercontent.com/Fabio-Kumahost/logwatch2/main/install.sh | bash
 ```
 
-The installer checks dependencies, generates secrets, creates the `.env`, starts the
-stack, runs migrations and prints your admin login. Non-interactive mode:
+The interactive wizard asks for your domain (with DNS verification) and admin
+username, checks Docker and ports, generates secrets, starts the stack, runs
+migrations and prints your admin login plus the agent install command.
+Unattended mode:
 
 ```bash
-curl -fsSL .../install.sh | bash -s -- --non-interactive --dir /opt/logwatch2
+curl -fsSL .../install.sh | bash -s -- --non-interactive --domain logs.example.com
 ```
 
 Manual installation, agent setup and TLS are covered in [`docs/installation.md`](docs/installation.md).

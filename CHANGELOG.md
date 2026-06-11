@@ -6,6 +6,22 @@ versioning: [SemVer](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.1.1] — 2026-06-11
+
+### Changed
+- **Installer is now an interactive wizard** and the panel always runs on its
+  own (sub)domain behind HTTPS: the wizard asks for the domain, verifies the
+  DNS record against the server's public IP, offers bundled automatic TLS
+  (Caddy, default) or `--behind-proxy` for an existing reverse proxy, asks for
+  the admin username, and writes `APP_URL`/`PANEL_DOMAIN`/`COMPOSE_FILE` into
+  `.env` so plain `docker compose` commands include the TLS overlay.
+  Unattended installs: `--non-interactive --domain logs.example.com`.
+- `PANEL_BIND` env var for the rare direct-exposure lab case.
+
+### Fixed
+- PHPStan findings: dead null comparison in `Config`, needless nullsafe call
+  in `JsonErrorHandler`.
+
 ## [0.1.0] — 2026-06-11
 
 First release. Full panel + agent + AI pipeline, installable via one-liner.
