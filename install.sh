@@ -173,8 +173,10 @@ mkdir -p "$INSTALL_DIR"
 cd "$INSTALL_DIR"
 
 if [ "$VERSION" = "latest" ]; then
-  VERSION="$(curl -fsSL "https://api.github.com/repos/$REPO/releases/latest" \
-    | grep -m1 '"tag_name"' | cut -d'"' -f4 || true)"
+  # Capture first, parse second — grep -m1 on a live pipe makes curl emit a
+  # spurious "(23) Failure writing output" when it closes the pipe early.
+  api_json="$(curl -fsSL "https://api.github.com/repos/$REPO/releases/latest" 2>/dev/null || true)"
+  VERSION="$(printf '%s\n' "$api_json" | grep -m1 '"tag_name"' | cut -d'"' -f4 || true)"
   [ -n "$VERSION" ] || die "could not determine the latest release — specify --version vX.Y.Z"
 fi
 TARBALL_URL="https://github.com/$REPO/releases/download/$VERSION/logwatch2-$VERSION.tar.gz"
@@ -184,6 +186,13 @@ curl -fsSL -o "$TMP/release.sha256" "$TARBALL_URL.sha256" || die "checksum downl
 ( cd "$TMP" && printf '%s  release.tar.gz\n' "$(cut -d' ' -f1 release.sha256)" | sha256sum -c - >/dev/null ) \
   || die "checksum verification FAILED — refusing to install"
 tar -xzf "$TMP/release.tar.gz" -C "$INSTALL_DIR" --strip-components=1
+
+# Sanity: everything compose will reference must exist NOW — failing here
+# beats failing mid-start with a half-installed stack.
+for f in docker-compose.yml docker-compose.tls.yml .env.example backend/Dockerfile; do
+  [ -e "$INSTALL_DIR/$f" ] || die "release tarball is missing '$f' — please report this at
+   https://github.com/$REPO/issues (you can install a specific version with --version)"
+done
 ok "release $VERSION verified and unpacked"
 
 # ---------- [6] configuration ----------

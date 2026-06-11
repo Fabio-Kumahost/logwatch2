@@ -6,6 +6,15 @@ versioning: [SemVer](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.1.2] — 2026-06-11
+
+### Fixed
+- Release tarball was missing `docker-compose.tls.yml`, breaking the default
+  (Caddy TLS) install path at `docker compose up`. The installer now also
+  sanity-checks the unpacked tarball before touching Docker.
+- Spurious `curl: (23)` warning during version detection (early-closing
+  `grep -m1` pipe).
+
 ## [0.1.1] — 2026-06-11
 
 ### Changed

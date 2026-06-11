@@ -70,7 +70,8 @@ jobs:
         run: |
           mkdir -p "logwatch2-${GITHUB_REF_NAME}"
           cp -r backend docker docs scripts examples \
-                docker-compose.yml .env.example install.sh LICENSE README.md \
+                docker-compose.yml docker-compose.tls.yml \
+                .env.example install.sh LICENSE README.md \
                 "logwatch2-${GITHUB_REF_NAME}/"
           tar -czf "dist/logwatch2-${GITHUB_REF_NAME}.tar.gz" "logwatch2-${GITHUB_REF_NAME}"
           (cd dist && sha256sum "logwatch2-${GITHUB_REF_NAME}.tar.gz" > "logwatch2-${GITHUB_REF_NAME}.tar.gz.sha256")
