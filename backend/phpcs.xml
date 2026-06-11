@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<ruleset name="Logwatch2">
+  <description>
+    PSR-12, with one documented deviation: compact multi-line formatting of
+    function calls/declarations/control structures is allowed (we don't force
+    one-argument-per-line). Everything else — braces, naming, spacing,
+    visibility, imports — is enforced.
+  </description>
+  <arg name="extensions" value="php"/>
+  <rule ref="PSR12">
+    <exclude name="PSR2.Methods.FunctionCallSignature"/>
+    <exclude name="Squiz.Functions.MultiLineFunctionDeclaration"/>
+    <exclude name="PSR12.ControlStructures.ControlStructureSpacing"/>
+  </rule>
+</ruleset>
